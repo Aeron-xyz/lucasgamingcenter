@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Lucas GAMING CENTER</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="dashboard.html" class="navbar-brand">
+            <div class="navbar-logo">L</div>
+            <span>Lucas Gaming Center</span>
+        </a>
+        <div class="navbar-nav">
+            <a href="dashboard.html" class="nav-link">Dashboard</a>
+            <a href="transactions.html" class="nav-link">Transactions</a>
+            <a href="alerts.html" class="nav-link">Alerts</a>
+            <a href="settings.html" class="nav-link active">Settings</a>
+            <button class="logout-btn" onclick="handleLogout()">Logout</button>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <h1 class="page-title">Settings</h1>
+
+        <div class="settings-grid">
+            <div class="card">
+                <div class="card-title">Coin Levels Thresholds</div>
+                <div class="setting-item">
+                    <label for="p1-threshold">P1 Low Level Alert:</label>
+                    <input type="number" id="p1-threshold" value="50" placeholder="50 Coins">
+                </div>
+                <div class="setting-item">
+                    <label for="p5-threshold">P5 Low Level Alert:</label>
+                    <input type="number" id="p5-threshold" value="30" placeholder="30 Coins">
+                </div>
+                <div class="setting-item">
+                    <label for="p10-threshold">P10 Low Level Alert:</label>
+                    <input type="number" id="p10-threshold" value="20" placeholder="20 Coins">
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Notification Settings</div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="sms-alerts" checked>
+                        <label for="sms-alerts">Send SMS Alerts</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="email-alerts" checked>
+                        <label for="email-alerts">Send Email Alerts</label>
+                    </div>
+                </div>
+                <button class="save-btn" id="save-settings">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
