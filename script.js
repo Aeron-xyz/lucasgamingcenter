@@ -73,6 +73,9 @@ function initDashboard() {
     // Load dashboard data
     updateDashboardStats();
     loadRecentTransactions();
+    
+    // Update hopper coins in real-time every 2 seconds
+    setInterval(updateHopperCoins, 2000);
 }
 
 function updateDashboardStats() {
@@ -95,27 +98,85 @@ function updateDashboardStats() {
     document.getElementById('total-transactions').textContent = stats.totalTransactions;
     document.getElementById('total-coins').textContent = stats.totalCoinsDispensed.toLocaleString() + ' Coins';
     
-    // Update coin levels
+    // Calculate total peso coins in hopper (sum of all coin counts)
+    const totalCoinsInHopper = Object.values(stats.coinLevels).reduce((sum, count) => sum + count, 0);
+    const hopperCoinsElement = document.getElementById('hopper-coins');
+    if (hopperCoinsElement) {
+        hopperCoinsElement.textContent = totalCoinsInHopper.toLocaleString() + ' Coins';
+    }
+    
+    // Store coin levels for real-time updates
     const coinLevelsContainer = document.getElementById('coin-levels');
     if (coinLevelsContainer) {
-        coinLevelsContainer.innerHTML = '';
-        Object.entries(stats.coinLevels).forEach(([denom, amount]) => {
-            const coinItem = document.createElement('div');
-            coinItem.className = 'coin-item';
-            coinItem.innerHTML = `
-                <span class="coin-denomination">${denom}</span>
-                <span class="coin-amount">${amount}</span>
-            `;
-            coinLevelsContainer.appendChild(coinItem);
-        });
+        coinLevelsContainer.setAttribute('data-coin-levels', JSON.stringify(stats.coinLevels));
     }
+    
+    // Store coin levels in localStorage for alerts page
+    localStorage.setItem('coinLevels', JSON.stringify(stats.coinLevels));
+}
+
+// Real-time hopper coin count update
+function updateHopperCoins() {
+    // In production, fetch real-time data from API/device
+    // Simulate fetching current hopper coin count from device
+    fetchHopperCoinCount().then(totalCoins => {
+        const hopperCoinsElement = document.getElementById('hopper-coins');
+        if (hopperCoinsElement) {
+                    hopperCoinsElement.textContent = totalCoins.toLocaleString() + ' Coins';
+        }
+    }).catch(error => {
+        console.error('Error fetching hopper coin count:', error);
+        // Fallback to stored data
+        const coinLevelsContainer = document.getElementById('coin-levels');
+        if (coinLevelsContainer) {
+            const coinLevelsData = coinLevelsContainer.getAttribute('data-coin-levels');
+            if (coinLevelsData) {
+                const coinLevels = JSON.parse(coinLevelsData);
+                const totalCoinsInHopper = Object.values(coinLevels).reduce((sum, count) => sum + count, 0);
+                const hopperCoinsElement = document.getElementById('hopper-coins');
+                if (hopperCoinsElement) {
+                    hopperCoinsElement.textContent = totalCoinsInHopper.toLocaleString() + ' Coins';
+                }
+                // Update localStorage for alerts page
+                localStorage.setItem('coinLevels', coinLevelsData);
+            }
+        }
+    });
+}
+
+// Fetch hopper coin count from device/API
+function fetchHopperCoinCount() {
+    // In production, replace with actual API call to device
+    // Example: return fetch('/api/hopper/coins').then(res => res.json()).then(data => data.count);
+    
+    // Simulate API call with stored coin levels
+    return new Promise((resolve) => {
+        // Simulate async API call
+        setTimeout(() => {
+            const coinLevelsContainer = document.getElementById('coin-levels');
+            if (coinLevelsContainer) {
+                const coinLevelsData = coinLevelsContainer.getAttribute('data-coin-levels');
+                if (coinLevelsData) {
+                    const coinLevels = JSON.parse(coinLevelsData);
+                    const totalCoinsInHopper = Object.values(coinLevels).reduce((sum, count) => sum + count, 0);
+                    // Update localStorage for alerts page
+                    localStorage.setItem('coinLevels', coinLevelsData);
+                    resolve(totalCoinsInHopper);
+                } else {
+                    resolve(0);
+                }
+            } else {
+                resolve(0);
+            }
+        }, 100);
+    });
 }
 
 function loadRecentTransactions() {
     const transactions = [
-        { date: '04/15/2024', type: 'Coin Change', amount: 'P50', coins: '10 Coins' },
-        { date: '04/14/2024', type: 'Bill Change', amount: 'P100', coins: '20 Coins' },
-        { date: '04/14/2024', type: 'Coin Change', amount: 'P20', coins: '4 Coins' }
+        { date: '04/15/2024', type: 'Bill Accepted', amount: 'P100', coins: '100 Coins' },
+        { date: '04/14/2024', type: 'Bill Accepted', amount: 'P50', coins: '50 Coins' },
+        { date: '04/14/2024', type: 'Coin Change', amount: 'P20', coins: '20 Coins' }
     ];
     
     const tbody = document.querySelector('#recent-transactions tbody');
@@ -146,13 +207,13 @@ function initTransactions() {
 
 function loadAllTransactions() {
     const transactions = [
-        { date: '04/15/2024', type: 'Coin Change', amount: 'P50', coins: '10 Coins' },
-        { date: '04/15/2024', type: 'Bill Change', amount: 'P100', coins: '20 Coins' },
-        { date: '04/15/2024', type: 'Coin Change', amount: 'P50', coins: '10 Coins' },
-        { date: '04/15/2024', type: 'Bill Change', amount: 'P100', coins: '20 Coins' },
-        { date: '04/16/2024', type: 'Coin Change', amount: 'P50', coins: '10 Coins' },
-        { date: '04/15/2024', type: 'Bill Change', amount: 'P100', coins: '20 Coins' },
-        { date: '04/13/2024', type: 'Coin Change', amount: 'P50', coins: '10 Coins' }
+        { date: '04/15/2024', type: 'Bill Accepted', amount: 'P100', coins: '100 Coins' },
+        { date: '04/15/2024', type: 'Bill Accepted', amount: 'P50', coins: '50 Coins' },
+        { date: '04/15/2024', type: 'Coin Change', amount: 'P20', coins: '20 Coins' },
+        { date: '04/15/2024', type: 'Coin Change', amount: 'P10', coins: '10 Coins' },
+        { date: '04/16/2024', type: 'Bill Accepted', amount: 'P100', coins: '100 Coins' },
+        { date: '04/15/2024', type: 'Coin Change', amount: 'P5', coins: '5 Coins' },
+        { date: '04/13/2024', type: 'Bill Accepted', amount: 'P50', coins: '50 Coins' }
     ];
     
     const tbody = document.querySelector('#transactions-table tbody');
@@ -202,12 +263,6 @@ function loadSettings() {
     if (settings.p1Threshold) {
         document.getElementById('p1-threshold').value = settings.p1Threshold;
     }
-    if (settings.p5Threshold) {
-        document.getElementById('p5-threshold').value = settings.p5Threshold;
-    }
-    if (settings.p10Threshold) {
-        document.getElementById('p10-threshold').value = settings.p10Threshold;
-    }
     if (settings.smsAlerts !== undefined) {
         document.getElementById('sms-alerts').checked = settings.smsAlerts;
     }
@@ -219,8 +274,6 @@ function loadSettings() {
 function handleSaveSettings() {
     const settings = {
         p1Threshold: document.getElementById('p1-threshold').value,
-        p5Threshold: document.getElementById('p5-threshold').value,
-        p10Threshold: document.getElementById('p10-threshold').value,
         smsAlerts: document.getElementById('sms-alerts').checked,
         emailAlerts: document.getElementById('email-alerts').checked
     };
@@ -235,13 +288,32 @@ function initAlerts() {
 }
 
 function loadAlerts() {
-    const alerts = [
-        {
+    // Get current P1 coin level from localStorage
+    const coinLevelsData = localStorage.getItem('coinLevels');
+    let p1CoinLevel = 0;
+    if (coinLevelsData) {
+        const coinLevels = JSON.parse(coinLevelsData);
+        p1CoinLevel = coinLevels['P1'] || 0;
+    }
+    
+    // Get threshold from settings
+    const settings = JSON.parse(localStorage.getItem('settings') || '{}');
+    const p1Threshold = parseInt(settings.p1Threshold) || 50;
+    
+    const alerts = [];
+    
+    // Only show low coin alert if peso coins are below threshold
+    if (p1CoinLevel < p1Threshold) {
+        alerts.push({
             title: 'Low Coin Level Alert',
-            message: 'P5 coin level is below threshold (30 coins remaining)',
+            message: `Peso coin level is below threshold (${p1CoinLevel} coins remaining)`,
             time: '2 hours ago',
             type: 'warning'
-        },
+        });
+    }
+    
+    // Add other system alerts
+    alerts.push(
         {
             title: 'System Online',
             message: 'All systems are operating normally',
@@ -250,7 +322,7 @@ function loadAlerts() {
         },
         {
             title: 'Transaction Completed',
-            message: 'Successfully dispensed 20 coins for P100 bill change',
+            message: 'Successfully accepted P100 bill and dispensed 100 coins',
             time: '1 day ago',
             type: 'info'
         },
@@ -260,7 +332,7 @@ function loadAlerts() {
             time: '2 days ago',
             type: 'critical'
         }
-    ];
+    );
     
     const alertsContainer = document.getElementById('alerts-container');
     if (alertsContainer) {
